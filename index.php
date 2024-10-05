@@ -72,7 +72,7 @@ $dbh = new sdbh();
             event.preventDefault();
 
             const price = $.ajax({
-                url: 'App/calculate_copy.php',
+                url: 'App/calculate.php',
                 type: 'POST',
                 data: $(this).serialize(),
                 dataType: 'json'
