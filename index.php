@@ -71,16 +71,36 @@ $dbh = new sdbh();
         $("#form").submit(function(event) {
             event.preventDefault();
 
-            $.ajax({
+            const price = $.ajax({
                 url: 'App/calculate.php',
                 type: 'POST',
                 data: $(this).serialize(),
-                success: function(response) {
-                    $("#total-price").text(response);
-                },
-                error: function() {
-                    $("#total-price").text('Ошибка при расчете');
+                dataType: 'json'
+            });
+            //если запрос отработал успешно, проверка: тип ответа строка (текст ошибки) - вывод строки 
+            //иначе разбор массива
+            price.done((msg) => {
+                if (typeof msg === "string") $("#total-price").text(msg);
+                else {
+                    const service_price = msg["service_price"];
+                    const total_price = msg["total_price"];
+                    const tariff = msg["tariff"];
+                    const days = msg["days"];
+
+                    const str_tooltip = "Выбрано " + days + "\nТариф: " + tariff + "\n " + service_price;
+
+                    $("#total-price").text(total_price);
+                    //после итоговой суммы добавление вывода изображения знака вопроса, где будет tooltip с подробным описанием
+                    let html = ''; 
+                    html += `<img src="assets/img/icons8-heip.png" alt="help" style="max-height:50px" 
+                    data-bs-toggle="tooltip" data-bs-placement="bottom" title="${str_tooltip}"/>`;
+
+                    $('#total-price').append(html);
                 }
+            });
+            //если запрос отработал с ошибкой
+            price.fail((ready, status) => {
+                $("#total-price").text('Ошибка при расчете');
             });
         });
     });
